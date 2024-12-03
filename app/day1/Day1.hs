@@ -4,6 +4,7 @@
 module Day1 where
 
 import Data.List (sort)
+import Utils
 
 getInput :: IO ([Int], [Int])
 getInput = do
@@ -14,7 +15,7 @@ solve1 :: ([Int], [Int]) -> Int
 solve1 (as, bs) = (sum . map abs) (zipWith (-) (sort as) (sort bs))
 
 solve2 :: ([Int], [Int]) -> Int
-solve2 (as, bs) = sum (map (\x -> x * length (filter (== x) bs)) as)
+solve2 (as, bs) = sum (map (\x -> x * count (== x) bs) as)
 
 part1 :: IO ()
 part1 = getInput >>= print . solve1

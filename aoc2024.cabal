@@ -61,7 +61,7 @@ executable aoc2024
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    Test, Day1
+    other-modules:    Test, Utils, Day1, Day2
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -70,7 +70,7 @@ executable aoc2024
     build-depends:    base ^>=4.18.2.1
 
     -- Directories containing source files.
-    hs-source-dirs:   app, app/day1
+    hs-source-dirs:   app, app/day1, app/day2
 
     -- Base language which the package is written in.
     default-language: Haskell2010
