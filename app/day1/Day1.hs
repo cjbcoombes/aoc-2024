@@ -1,16 +1,14 @@
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
 module Day1 where
 
-import Control.Monad (foldM)
 import Data.List (sort)
 
 getInput :: IO ([Int], [Int])
-getInput = foldM accum ([], []) [1 .. 1000]
-  where
-    accum (as, bs) _ = do
-      [a, b] <- map read . words <$> getLine
-      return (a : as, b : bs)
+getInput = do
+  contents <- readFile "app/day1/input.txt"
+  return $ unzip (map ((\[a, b] -> (a, b)) . map read . words) (lines contents))
 
 solve1 :: ([Int], [Int]) -> Int
 solve1 (as, bs) = (sum . map abs) (zipWith (-) (sort as) (sort bs))
