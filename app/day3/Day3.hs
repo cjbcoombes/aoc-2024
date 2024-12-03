@@ -3,44 +3,47 @@
 
 module Day3 where
 
+import Control.Applicative ((<|>))
 import Parser
 import Result
 
 getInput :: IO String
 getInput = readFile "app/day3/input.txt"
 
-mulParser :: Parser Char String Int
-mulParser = expr
+mulP :: Parser Char String Int
+mulP = mul *> (lp *> ((*) <$> num <*> (comma *> num)) <* rp)
   where
     num = (read :: String -> Int) <$> takeWhile1P (`elem` "0123456789")
     lp = exactP '('
     rp = exactP ')'
     comma = exactP ','
     mul = stringP "mul"
-    expr = mul *> (lp *> ((*) <$> num <*> (comma *> num)) <* rp)
+
+doP :: Parser Char String Int
+doP = 0 <$ stringP "do()"
+
+dontP :: Parser Char String Int
+dontP = 0 <$ stringP "don't()"
 
 solve1 :: String -> Int
-solve1 [] = 0
-solve1 s@(_ : xs) =
-  case runParser mulParser s of
-    Accept (n, rest) -> n + solve1 rest
-    Reject _ -> solve1 xs
+solve1 s =
+  case runParser parser s of
+    Accept (i, []) -> i
+    Accept _ -> error "didn't consume all"
+    Reject _ -> error "parser failed"
+  where
+    parser = (0 <$ eofP) <|> ((+) <$> mulP <*> parser) <|> (predP (const True) *> parser)
 
 solve2 :: String -> Int
-solve2 [] = 0
-solve2 s@(_ : xs) =
-  case runParser mulParser s of
-    Accept (n, rest) -> n + solve2 rest
-    Reject _ -> case runParser dont s of
-      Accept (_, rest) -> solve2 (untilDo rest)
-      Reject _ -> solve2 xs
+solve2 s =
+  case runParser enabled s of
+    Accept (i, []) -> i
+    Accept _ -> error "didn't consume all"
+    Reject e -> error $ "parser failed: " ++ show e
   where
-    doo = stringP "do()"
-    dont = stringP "don't()"
-    untilDo [] = []
-    untilDo s@(_ : xs) = case runParser doo s of
-      Accept (_, rest) -> rest
-      Reject _ -> untilDo xs
+    wrap p = (0 <$ eofP) <|> p <|> (predP (const True) *> wrap p)
+    enabled = wrap $ ((+) <$> mulP <*> enabled) <|> (dontP *> disabled)
+    disabled = wrap (doP *> enabled)
 
 part1 :: IO ()
 part1 = getInput >>= print . solve1
