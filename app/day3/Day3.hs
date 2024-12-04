@@ -25,6 +25,9 @@ doP = 0 <$ stringP "do()"
 dontP :: Parser Char String Int
 dontP = 0 <$ stringP "don't()"
 
+anyP :: Parser Char String Int
+anyP = 0 <$ predP (const True)
+
 solve1 :: String -> Int
 solve1 s =
   case runParser parser s of
@@ -32,16 +35,16 @@ solve1 s =
     Accept _ -> error "didn't consume all"
     Reject _ -> error "parser failed"
   where
-    parser = (0 <$ eofP) <|> ((+) <$> mulP <*> parser) <|> (predP (const True) *> parser)
+    parser = (0 <$ eofP) <|> ((+) <$> mulP <*> parser) <|> (anyP *> parser)
 
 solve2 :: String -> Int
 solve2 s =
   case runParser enabled s of
     Accept (i, []) -> i
     Accept _ -> error "didn't consume all"
-    Reject e -> error $ "parser failed: " ++ show e
+    Reject _ -> error "parser failed"
   where
-    wrap p = (0 <$ eofP) <|> p <|> (predP (const True) *> wrap p)
+    wrap p = (0 <$ eofP) <|> p <|> (anyP *> wrap p)
     enabled = wrap $ ((+) <$> mulP <*> enabled) <|> (dontP *> disabled)
     disabled = wrap (doP *> enabled)
 
