@@ -8,4 +8,4 @@ import Day3 (part1, part2)
 import Day4 (part1, part2)
 
 main :: IO ()
-main = putStrLn "Hello, Haskell!" >> Day4.part1
+main = putStrLn "Hello, Haskell!" >> Day3.part2
