@@ -1,10 +1,9 @@
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
 
 module Parser (module Parser) where
 
-import Control.Applicative (Alternative (..))
+import Control.Applicative (Alternative (..), (<|>))
 import Result (Result (..), mapReject)
 
 data ParseError i e
