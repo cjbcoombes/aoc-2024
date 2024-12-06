@@ -8,7 +8,7 @@ import Data.Maybe (fromJust)
 import qualified Data.Set as S
 import Utils
 
-newtype Grid = Grid (UArray (Int, Int) Char) deriving (Show)
+data Grid = Grid (UArray (Int, Int) Char) (Int, Int) deriving (Show)
 
 data Pos = Pos {pos :: (Int, Int), dir :: (Int, Int)} deriving (Eq, Ord, Show)
 
@@ -18,20 +18,24 @@ getInput = do
   let y = fromJust $ findIndex ('^' `elem`) contents
       x = fromJust $ elemIndex '^' (contents !! y)
       arr = listArray ((1, 1), (length contents, length (head contents))) (concat contents)
-  return (Grid arr, Pos (x + 1, y + 1) (0, -1))
+  return (Grid arr (-1, -1), Pos (x + 1, y + 1) (0, -1))
 
 rot :: (Int, Int) -> (Int, Int)
 rot (dx, dy) = (-dy, dx)
 
+rotPos :: Pos -> Pos
 rotPos (Pos p d) = Pos p (rot d)
 
+stepPos :: Pos -> Pos
 stepPos (Pos (x, y) (dx, dy)) = Pos (x + dx, y + dy) (dx, dy)
 
 step :: Grid -> Pos -> Maybe Pos
-step (Grid arr) p@(Pos (x, y) (dx, dy)) =
-  (arr !? (y + dy, x + dx)) >>= \case
-    '#' -> step (Grid arr) (rotPos p)
+step (Grid arr ex) p@(Pos (x, y) (dx, dy)) =
+  loc >>= \case
+    '#' -> step (Grid arr ex) (rotPos p)
     _ -> Just (stepPos p)
+  where
+    loc = if (x + dx, y + dy) == ex then Just '#' else arr !? (y + dy, x + dx)
 
 posSet :: Grid -> Pos -> S.Set Pos
 posSet g p = case step g p of
@@ -51,12 +55,12 @@ loops g = loops' S.empty
           Just p' -> loops' (S.insert p s) p'
 
 solve2 :: Grid -> Pos -> Int
-solve2 (Grid arr) p = count (flip loops p . putBlock arr) (range . bounds $ arr)
+solve2 (Grid arr ex) p = count (flip loops p . putBlock) (range . bounds $ arr)
   where
-    putBlock arr' (x, y) =
-      if arr' ! (y, x) /= '.'
-        then Grid arr'
-        else Grid $ arr' // [((y, x), '#')]
+    putBlock (x, y) =
+      if arr ! (y, x) /= '.'
+        then Grid arr ex
+        else Grid arr (x, y)
 
 part1 :: IO ()
 part1 = getInput >>= print . uncurry solve1
