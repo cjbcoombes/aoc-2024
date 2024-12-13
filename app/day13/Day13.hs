@@ -2,10 +2,10 @@
 
 module Day13 where
 
-import Control.Monad (guard, msum)
+import Control.Monad (guard)
 import Data.Maybe (fromMaybe)
 import Data.Void (Void)
-import Text.Megaparsec (Parsec, eof, many, optional, parseMaybe, runParser, some)
+import Text.Megaparsec (Parsec, eof, many, optional, parseMaybe, some)
 import Text.Megaparsec.Char (digitChar, eol, string)
 
 type Parser = Parsec Void String
@@ -23,24 +23,8 @@ getInput = concat . parseMaybe (many machine <* eof) <$> readFile "app/day13/inp
       optional eol
       return $ Machine (read ax, read ay) (read bx, read by) (read px, read py)
 
-tryBs :: Machine -> Integer -> Maybe (Integer, Integer)
-tryBs (Machine (ax, ay) (bx, by) (px, py)) k =
-  do
-    guard $ dx >= 0 && dy >= 0
-    (rx, 0) <- Just $ dx `quotRem` ax
-    (ry, 0) <- Just $ dy `quotRem` ay
-    guard (rx == ry)
-    guard $ rx == dy `quot` ay && rx <= 100
-    return (rx, k)
-  where
-    (bbx, bby) = (k * bx, k * by)
-    (dx, dy) = (px - bbx, py - bby)
-
-tryMachine :: Machine -> Maybe (Integer, Integer)
-tryMachine m = msum (map (tryBs m) (reverse [0 .. 100]))
-
-solve :: (Machine -> Maybe (Integer, Integer)) -> [Machine] -> Integer
-solve f = sum . map (cost . fromMaybe (0, 0) . f)
+solve :: [Machine] -> Integer
+solve = sum . map (cost . fromMaybe (0, 0) . solveMachine)
   where
     cost (a, b) = 3 * a + b
 
@@ -66,7 +50,7 @@ convertMachine (Machine (ax, ay) (bx, by) (px, py)) =
   Machine (ax, ay) (bx, by) (10000000000000 + px, 10000000000000 + py)
 
 part1 :: IO ()
-part1 = getInput >>= print . solve tryMachine
+part1 = getInput >>= print . solve
 
 part2 :: IO ()
-part2 = getInput >>= print . solve solveMachine . map convertMachine
+part2 = getInput >>= print . solve . map convertMachine
