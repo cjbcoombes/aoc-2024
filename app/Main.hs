@@ -11,6 +11,7 @@ import Day14 (part1, part2)
 import Day15 (part1, part2)
 import Day17 (part1, part2)
 import Day18 (part1, part2)
+import Day19 (part1, part2)
 import Day2 (part1, part2)
 import Day3 (part1, part2)
 import Day4 (part1, part2)
@@ -21,4 +22,4 @@ import Day8 (part1, part2)
 import Day9 (part1, part2)
 
 main :: IO ()
-main = putStrLn "Hello, Haskell!" >> Day18.part1
+main = putStrLn "Hello, Haskell!" >> Day19.part2
